@@ -30,6 +30,7 @@ public class Robot extends TimedRobot {
   // The gyro sensor
   public static NavXSwerve m_gyro;
   double joy_angle = 0.0;
+  int angle_count = 0;
 
   public XboxController m_driverController = new XboxController(0);
 
@@ -41,12 +42,11 @@ public class Robot extends TimedRobot {
     m_gyro = new NavXSwerve(SPI.Port.kMXP);
     config = ModuleConstants.Front_Left_Configuration;
     module = new SwerveModule(ModuleConstants.Front_Left_Configuration);
+  }
 
-    if (m_gyro.isConnected()) {
-      System.out.println("Gyro Connected");
-    } else {
-      System.out.println("Gyro is NOT connected");
-    }
+  @Override
+  public void autonomousInit() {
+
   }
 
   @Override
@@ -84,5 +84,6 @@ public class Robot extends TimedRobot {
     //
     SmartDashboard.putNumber("Gyro YAW", m_gyro.getYaw());
     SmartDashboard.putNumber("Gyro Rotation", m_gyro.getRotation3d().getAngle());
+    SmartDashboard.putBoolean("Gyro Connected", m_gyro.isConnected());
   }
 }
