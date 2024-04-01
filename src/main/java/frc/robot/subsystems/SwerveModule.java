@@ -188,6 +188,7 @@ public class SwerveModule {
     // - Outside wheel diameter = 4in
     m_driveMotor.restoreFactoryDefaults();
     m_driveMotor.clearFaults();
+    
     if (m_driveMotor.setIdleMode(Constants.ModuleConstants.DRIVE_IDLE_MODE) != REVLibError.kOk) {
       SmartDashboard.putString("Drive Motor Idle Mode", "Error");
     }
@@ -215,7 +216,7 @@ public class SwerveModule {
      * input
      * Native will ready 0.0 -> 1.0 for each revolution.
      */
-    m_angleEncoder.setZeroOffset(module_constants.angleEncoderOffsetDegrees);
+    m_angleEncoder.setZeroOffset(module_constants.angleEncoderOffset);
     m_angleEncoder.setInverted(module_constants.angleEncoderReversed);
     m_angleEncoder.setAverageDepth(8);
     

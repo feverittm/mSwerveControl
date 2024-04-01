@@ -8,10 +8,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.utils.NavXSwerve;
+import frc.robot.utils.SwerveModuleConstants;
 import edu.wpi.first.wpilibj.SerialPort;
 
 /**
@@ -29,13 +31,26 @@ public class Robot extends TimedRobot {
   public static NavXSwerve m_gyro;
   double joy_angle = 0.0;
 
+  private String m_moduleSelected;
+  private final SendableChooser<String> m_chooser = new SendableChooser<>();
 
   public XboxController m_driverController = new XboxController(0);
 
+  SwerveModuleConstants config;
+
+
   @Override
   public void robotInit() {
-    module = new SwerveModule(ModuleConstants.kMOD_3_Constants);
     m_gyro = new NavXSwerve(SerialPort.Port.kMXP);
+    config = ModuleConstants.Front_Left_Configuration;
+    module = new SwerveModule(ModuleConstants.Front_Left_Configuration);
+
+    m_chooser.setDefaultOption("Front Left Module", "Front_Left");
+    m_chooser.addOption("Front Right Module", "Front_Right");
+    m_chooser.addOption("Back Right Module", "Back_Right");
+    m_chooser.addOption("Back Left Module", "Back_Left");
+    
+    SmartDashboard.putData("Swerve Module Choices", m_chooser);
   }
 
   @Override
@@ -44,17 +59,39 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void teleopInit() {
+    m_moduleSelected = m_chooser.getSelected();
+
+    // now we have a string... it needs to be in a module pointer
+    SwerveModuleConstants config;
+    switch (m_moduleSelected) {
+      case "Front_Right": config = ModuleConstants.Front_Right_Configuration;
+                          break;      
+      case "Back_Right":  config = ModuleConstants.Back_Right_Configuration;
+                          break;      
+      case "Back_Left":   config = ModuleConstants.Back_Left_Configuration;
+                          break;
+      default:            config = ModuleConstants.Front_Left_Configuration;
+                          break;
+    }
+
+    module = new SwerveModule(config);
+    System.out.println("Module selected: " + m_moduleSelected);
+  }
+
+  @Override
   public void teleopPeriodic() {
     joy_angle = -m_driverController.getLeftX()*Math.PI;
     SmartDashboard.putNumber("Joystick Angle", joy_angle);
-    SwerveModuleState state = new SwerveModuleState(0.0, new Rotation2d(joy_angle));
-    module.setDesiredState(state);
+    //SwerveModuleState state = new SwerveModuleState(0.0, new Rotation2d(joy_angle));
+    //module.setDesiredState(state);
   }
 
   @Override
   public void robotPeriodic() {
     // swerve module state
     SwerveModuleState state = module.getState();
+    SmartDashboard.putNumber("Module Number", config.moduleNumber);
     SmartDashboard.putNumber("Module State - Velocity: ", state.speedMetersPerSecond);
     SmartDashboard.putNumber("Module State - Angle: ", state.angle.getDegrees());
     SmartDashboard.putNumber("Module Position - Distance: ", module.getPosition().distanceMeters);
