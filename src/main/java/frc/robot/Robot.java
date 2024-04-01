@@ -60,23 +60,23 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    m_moduleSelected = m_chooser.getSelected();
+    // m_moduleSelected = m_chooser.getSelected();
 
-    // now we have a string... it needs to be in a module pointer
-    SwerveModuleConstants config;
-    switch (m_moduleSelected) {
-      case "Front_Right": config = ModuleConstants.Front_Right_Configuration;
-                          break;      
-      case "Back_Right":  config = ModuleConstants.Back_Right_Configuration;
-                          break;      
-      case "Back_Left":   config = ModuleConstants.Back_Left_Configuration;
-                          break;
-      default:            config = ModuleConstants.Front_Left_Configuration;
-                          break;
-    }
+    // // now we have a string... it needs to be in a module pointer
+    // SwerveModuleConstants config;
+    // switch (m_moduleSelected) {
+    //   case "Front_Right": config = ModuleConstants.Front_Right_Configuration;
+    //                       break;      
+    //   case "Back_Right":  config = ModuleConstants.Back_Right_Configuration;
+    //                       break;      
+    //   case "Back_Left":   config = ModuleConstants.Back_Left_Configuration;
+    //                       break;
+    //   default:            config = ModuleConstants.Front_Left_Configuration;
+    //                       break;
+    // }
 
-    module = new SwerveModule(config);
-    System.out.println("Module selected: " + m_moduleSelected);
+    // module = new SwerveModule(config);
+    // System.out.println("Module selected: " + m_moduleSelected);
   }
 
   @Override

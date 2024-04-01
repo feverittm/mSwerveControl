@@ -61,8 +61,6 @@ public class SwerveModule {
 
     m_driveMotor = new CANSparkMax(module_constants.driveMotorID, MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(module_constants.angleMotorID, MotorType.kBrushless);
-    m_driveMotor.restoreFactoryDefaults();
-    m_turningMotor.restoreFactoryDefaults();
 
     m_driveMotorEncoder = m_driveMotor.getEncoder();
     m_turningMotorEncoder = m_turningMotor.getEncoder();
@@ -70,7 +68,6 @@ public class SwerveModule {
     m_angleEncoder = m_turningMotor.getAbsoluteEncoder(Type.kDutyCycle);
 
     configureDevices();
-    resetEncoders();
   }
 
   /**
