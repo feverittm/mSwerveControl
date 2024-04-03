@@ -15,7 +15,6 @@ import frc.robot.utils.NavXSwerve;
 import frc.robot.utils.SwerveModuleConstants;
 import edu.wpi.first.wpilibj.SPI;
 
-
 /**
  * The VM is configured to automatically run this class, and to call the
  * functions corresponding to
@@ -35,7 +34,6 @@ public class Robot extends TimedRobot {
   public XboxController m_driverController = new XboxController(0);
 
   SwerveModuleConstants config;
-
 
   @Override
   public void robotInit() {
@@ -62,7 +60,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    joy_angle = -m_driverController.getLeftX()*Math.PI;
+    joy_angle = -m_driverController.getLeftX() * Math.PI;
     SmartDashboard.putNumber("Joystick Angle", joy_angle);
     SwerveModuleState state = new SwerveModuleState(0.0, new Rotation2d(joy_angle));
     module.setDesiredState(state);
