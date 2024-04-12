@@ -63,6 +63,9 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Raw Turning Motor Angle", module.getRawAngle());
     SmartDashboard.putNumber("Module Angle", module.getAngle().getDegrees());
     SmartDashboard.putBoolean("Module Zeroed", (module.getAngle().getRadians() == 0.0));
+    SmartDashboard.putNumber("Absolute Encoder Offset", module.getAbsoluteOffset());
+    SmartDashboard.putBoolean("Absolute Encoder Inversion", module.getAbsoluteEncoderInversion());
+
     //
     SmartDashboard.putNumber("Gyro YAW", m_gyro.getYaw());
     SmartDashboard.putNumber("Gyro Rotation", m_gyro.getRotation3d().getAngle());

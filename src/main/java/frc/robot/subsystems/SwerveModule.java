@@ -82,6 +82,14 @@ public class SwerveModule {
     return m_angleEncoder.getPosition();
   }
 
+  public double getAbsoluteOffset() {
+    return m_angleEncoder.getZeroOffset();
+  }
+
+  public boolean getAbsoluteEncoderInversion() {
+    return m_angleEncoder.getInverted();
+  }
+
   /**
    * Return the rotation vector for the absolute module angular position
    * 
