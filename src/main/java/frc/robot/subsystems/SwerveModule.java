@@ -44,7 +44,8 @@ public class SwerveModule {
           ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
           ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
 
-  // For tuning only.  Use a simple pid P-Only controller to get the value for kP.  Then we can work on Ka and Ks (trapezoidal constraints) 
+  // For tuning only.  Use a simple pid P-Only controller to get the value for kP.  
+  // Then we can work on Ka and Ks (trapezoidal constraints) 
   private final PIDController m_simpleTurningPIDController = new PIDController(
       ModuleConstants.kPModuleTurningController,
       0,
@@ -141,12 +142,14 @@ public class SwerveModule {
 
   /**
    * Sets the desired state for the module.
+   * https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html
    *
    * @param desiredState Desired state with speed and angle.
    */
   public void setDesiredState(SwerveModuleState desiredState) {
     // Optimize the reference state to avoid spinning further than 90 degrees
     //SwerveModuleState state = SwerveModuleState.optimize(desiredState, getState().angle);
+    SwerveModuleState target = SwerveModuleState.optimize(desiredState, getState().angle);
     SwerveModuleState state = desiredState;
 
     // Calculate the drive output from the drive PID controller.
@@ -163,6 +166,7 @@ public class SwerveModule {
     SmartDashboard.putNumber("State/turnOutput", turnOutput);
     SmartDashboard.putNumber("State/Trapezoidal turnOutput", turnOutput_trap);
     SmartDashboard.putNumber("Module offset", m_angleEncoder.getZeroOffset());
+    SmartDashboard.putNumber("Optimized Angle", target.angle.getDegrees());
 
 
 
@@ -199,6 +203,7 @@ public class SwerveModule {
       SmartDashboard.putString("Drive Motor Idle Mode", "Error");
     }
     m_driveMotor.setInverted(module_constants.driveMotorReversed);
+    m_driveMotor.setSmartCurrentLimit(Constants.ModuleConstants.DRIVE_CURRENT_LIMIT);
 
     // Set the distance per pulse for the drive encoder. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
@@ -215,6 +220,8 @@ public class SwerveModule {
     }
     m_turningMotor.setInverted(module_constants.angleMotorReversed);
     m_turningMotor.setSmartCurrentLimit(Constants.ModuleConstants.ANGLE_CURRENT_LIMIT);
+
+    // this is the relative encoder included in the NEO motor.
     m_turningMotorEncoder.setPositionConversionFactor(ModuleConstants.kTurningEncoderDistancePerPulse);
 
     /**
@@ -224,11 +231,16 @@ public class SwerveModule {
      */
     m_angleEncoder.setZeroOffset(module_constants.angleEncoderOffset);
     m_angleEncoder.setInverted(module_constants.angleEncoderReversed);
+    //m_angleEncoder.setPositionConversionFactor(2*Math.PI);
     m_angleEncoder.setAverageDepth(8);
     m_angleEncoder.setPositionConversionFactor(module_constants.angleEncoderConversionFactor);
     
     /**
      * Make PID continuous around the 180degree point of the rotation
+     *            0
+     *      PI/2  +  -PI/2
+     *          PI/-PI
+     * Note that + angle goes CCW from the zero point of the encoder.
      */
     m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
     m_turningPIDController.setTolerance(0.001);
