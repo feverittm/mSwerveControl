@@ -165,6 +165,7 @@ public class SwerveModule {
     SmartDashboard.putNumber("Module offset", m_angleEncoder.getZeroOffset());
 
 
+
     // Calculate the turning motor output from the turning PID controller.
     m_driveMotor.set(driveOutput);
     m_turningMotor.set(turnOutput);
@@ -224,11 +225,15 @@ public class SwerveModule {
     m_angleEncoder.setZeroOffset(module_constants.angleEncoderOffset);
     m_angleEncoder.setInverted(module_constants.angleEncoderReversed);
     m_angleEncoder.setAverageDepth(8);
+    m_angleEncoder.setPositionConversionFactor(module_constants.angleEncoderConversionFactor);
     
     /**
      * Make PID continuous around the 180degree point of the rotation
      */
     m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_turningPIDController.setTolerance(0.001);
     m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+
+    m_drivePIDController.setTolerance(0.1, 0.1);
   }
 }

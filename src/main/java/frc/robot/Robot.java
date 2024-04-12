@@ -13,6 +13,7 @@ import frc.robot.Constants.ModuleConstants;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.utils.NavXSwerve;
 import frc.robot.utils.SwerveModuleConstants;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 
 /**
@@ -29,9 +30,10 @@ public class Robot extends TimedRobot {
   // The gyro sensor
   public static NavXSwerve m_gyro;
   double joy_angle = 0.0;
+  double joy_drive = 0;
   int angle_count = 0;
 
-  public XboxController m_driverController = new XboxController(0);
+  public Joystick m_driverController = new Joystick(0);
 
   SwerveModuleConstants config;
 
@@ -49,7 +51,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void autonomousPeriodic() {
-    module.setDesiredState(new SwerveModuleState(0.0, new Rotation2d(0.0)));
+    module.setDesiredState(new SwerveModuleState(0.0, new Rotation2d((Math.PI)/(2))));
   }
 
   @Override
@@ -60,9 +62,10 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
-    joy_angle = -m_driverController.getLeftX() * Math.PI;
+    joy_angle = -m_driverController.getRawAxis(0) * (2*Math.PI);
+    joy_drive = -m_driverController.getRawAxis(2);
     SmartDashboard.putNumber("Joystick Angle", joy_angle);
-    SwerveModuleState state = new SwerveModuleState(0.0, new Rotation2d(joy_angle));
+    SwerveModuleState state = new SwerveModuleState(joy_drive, new Rotation2d(joy_angle));
     module.setDesiredState(state);
   }
 

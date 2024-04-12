@@ -34,7 +34,7 @@ public final class Constants {
                         new Translation2d(-kWheelBase / 2, kTrackWidth / 2),
                         new Translation2d(-kWheelBase / 2, -kTrackWidth / 2));
 
-        public static final boolean kGyroReversed = false;
+        public static final boolean kGyroReversed = true;
 
         // These are example values only - DO NOT USE THESE FOR YOUR OWN ROBOT!
         // These characterization values MUST be determined either experimentally or theoretically
@@ -104,11 +104,11 @@ public final class Constants {
                 1,
                 8,
                 1,
-                false,
+                true,
                 true,
                 false,
                 2 * Math.PI,
-                0
+                .462
         );
 
         // Front Right
@@ -116,7 +116,7 @@ public final class Constants {
                 2,
                 6,
                 7,
-                false,
+                true,
                 true,
                 false,
                 2 * Math.PI,
@@ -128,11 +128,11 @@ public final class Constants {
                 3,
                 4,
                 5,
-                false,
+                true,
                 true,
                 false,
-                2 * Math.PI,
-                0
+                2 * Math.PI, 
+                .759                  
         );
 
         // Back Left
@@ -140,11 +140,11 @@ public final class Constants {
                 4,
                 2,
                 3,
-                false,
                 true,
                 false,
+                false,
                 2 * Math.PI,
-                 0
+                 .158 //0 to 1
         );
     }
 
