@@ -91,52 +91,60 @@ public final class Constants {
         public static final double kPModuleDriveController = 0.0020645;
 
         /**
-         * Module specific constants.
-         * CanCoder offset is in DEGREES, not radians like the rest of the repo.
-         * This is to make offset slightly more accurate and easier to measure.
+         * Module Configurations:
+         * CanCoder offset is a raw number (0-1), this is measured using the rev client (or the
+         * value from the SmartDashboard).  If the code determines that a value has already 
+         * been set on the SparkMax using the Rev Client, then use it instead.
+         * 
+         * The hardware settings have been copied from the python repository.
          */
-        // Front Left Module
-        public static final SwerveModuleConstants kMOD_1_Constants = new SwerveModuleConstants(
+
+         // Front Left Module
+        public static final SwerveModuleConstants Front_Left_Configuration = new SwerveModuleConstants(
                 1,
                 8,
                 1,
-                true,
+                false,
                 true,
                 false,
-                0.28 // 254.5 degrees = 360 * 0.060
+                2 * Math.PI,
+                0
         );
 
         // Front Right
-        public static final SwerveModuleConstants kMOD_2_Constants = new SwerveModuleConstants(
+        public static final SwerveModuleConstants Front_Right_Configuration = new SwerveModuleConstants(
                 2,
                 6,
                 7,
-                true,
+                false,
                 true,
                 false,
-                0.48 //0.7069 // 152.0 degrees = 360 * 0.7069
-        );
-
-        // Back Left
-        public static final SwerveModuleConstants kMOD_4_Constants = new SwerveModuleConstants(
-                4,
-                2,
-                3,
-                true,
-                true,
-                false,
-                 0.7 // 0.324 // 131.0 degrees = 360 * 0.324
+                2 * Math.PI,
+                0
         );
 
         // Back Right
-        public static final SwerveModuleConstants kMOD_3_Constants = new SwerveModuleConstants(
+        public static final SwerveModuleConstants Back_Right_Configuration = new SwerveModuleConstants(
                 3,
                 4,
                 5,
-                true,
+                false,
                 true,
                 false,
-                0.202 //0.4221 // 152.0 degrees = 360 * 0.4221
+                2 * Math.PI,
+                0
+        );
+
+        // Back Left
+        public static final SwerveModuleConstants Back_Left_Configuration = new SwerveModuleConstants(
+                4,
+                2,
+                3,
+                false,
+                true,
+                false,
+                2 * Math.PI,
+                 0
         );
     }
 

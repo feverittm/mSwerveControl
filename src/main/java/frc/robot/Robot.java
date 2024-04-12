@@ -12,7 +12,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.utils.NavXSwerve;
-import edu.wpi.first.wpilibj.SerialPort;
+import frc.robot.utils.SwerveModuleConstants;
+import edu.wpi.first.wpilibj.SPI;
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -28,14 +29,22 @@ public class Robot extends TimedRobot {
   // The gyro sensor
   public static NavXSwerve m_gyro;
   double joy_angle = 0.0;
-
+  int angle_count = 0;
 
   public XboxController m_driverController = new XboxController(0);
 
+  SwerveModuleConstants config;
+
   @Override
   public void robotInit() {
-    module = new SwerveModule(ModuleConstants.kMOD_3_Constants);
-    m_gyro = new NavXSwerve(SerialPort.Port.kMXP);
+    m_gyro = new NavXSwerve(SPI.Port.kMXP);
+    config = ModuleConstants.Front_Left_Configuration;
+    module = new SwerveModule(ModuleConstants.Front_Left_Configuration);
+  }
+
+  @Override
+  public void autonomousInit() {
+
   }
 
   @Override
@@ -44,8 +53,14 @@ public class Robot extends TimedRobot {
   }
 
   @Override
+  public void teleopInit() {
+    SwerveModuleState state = new SwerveModuleState(0.0, new Rotation2d(0.0));
+    module.setDesiredState(state);
+  }
+
+  @Override
   public void teleopPeriodic() {
-    joy_angle = -m_driverController.getLeftX()*Math.PI;
+    joy_angle = -m_driverController.getLeftX() * Math.PI;
     SmartDashboard.putNumber("Joystick Angle", joy_angle);
     SwerveModuleState state = new SwerveModuleState(0.0, new Rotation2d(joy_angle));
     module.setDesiredState(state);
@@ -55,6 +70,7 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {
     // swerve module state
     SwerveModuleState state = module.getState();
+    SmartDashboard.putNumber("Module Number", config.moduleNumber);
     SmartDashboard.putNumber("Module State - Velocity: ", state.speedMetersPerSecond);
     SmartDashboard.putNumber("Module State - Angle: ", state.angle.getDegrees());
     SmartDashboard.putNumber("Module Position - Distance: ", module.getPosition().distanceMeters);
@@ -69,7 +85,6 @@ public class Robot extends TimedRobot {
     //
     SmartDashboard.putNumber("Gyro YAW", m_gyro.getYaw());
     SmartDashboard.putNumber("Gyro Rotation", m_gyro.getRotation3d().getAngle());
+    SmartDashboard.putBoolean("Gyro Connected", m_gyro.isConnected());
   }
-
-
 }
