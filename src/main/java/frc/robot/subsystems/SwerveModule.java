@@ -33,23 +33,9 @@ public class SwerveModule {
   private final RelativeEncoder m_turningMotorEncoder;
   private final SparkAbsoluteEncoder m_angleEncoder;
 
-  private final PIDController m_drivePIDController = new PIDController(ModuleConstants.kPModuleDriveController, 0, 0);
-
-  // Using a TrapezoidProfile PIDController to allow for smooth turning
-  private final ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
-      ModuleConstants.kPModuleTurningController,
-      0,
-      0,
-      new TrapezoidProfile.Constraints(
-          ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
-          ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
-
-  // For tuning only.  Use a simple pid P-Only controller to get the value for kP.  
-  // Then we can work on Ka and Ks (trapezoidal constraints) 
-  private final PIDController m_simpleTurningPIDController = new PIDController(
-      ModuleConstants.kPModuleTurningController,
-      0,
-      0);
+  private PIDController m_drivePIDController;
+  private PIDController m_simpleTurningPIDController;
+  private ProfiledPIDController m_turningPIDController;
 
   /**
    * Constructs a SwerveModule.
@@ -242,10 +228,25 @@ public class SwerveModule {
      *          PI/-PI
      * Note that + angle goes CCW from the zero point of the encoder.
      */
-    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-    m_turningPIDController.setTolerance(0.001);
-    m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_simpleTurningPIDController = new PIDController(
+      ModuleConstants.kPModuleTurningController,
+      0,
+      0);
 
-    m_drivePIDController.setTolerance(0.1, 0.1);
+      m_turningPIDController = new ProfiledPIDController(
+          ModuleConstants.kPModuleTurningController,
+          0,
+          0,
+          new TrapezoidProfile.Constraints(
+              ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
+              ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
+
+      m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+      m_turningPIDController.setTolerance(0.001);
+      m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+
+      m_drivePIDController = new PIDController(ModuleConstants.kPModuleDriveController, 0, 0);
+
+      m_drivePIDController.setTolerance(0.1, 0.1);
   }
 }
