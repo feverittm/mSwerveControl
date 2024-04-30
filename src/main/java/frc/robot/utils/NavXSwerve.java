@@ -60,7 +60,8 @@ public class NavXSwerve extends SwerveIMU {
        */
       gyro = new AHRS(port);
       factoryDefault();
-      SmartDashboard.putData(gyro);
+      //SmartDashboard.putData(gyro);
+      //SmartDashboard.getNumber("gyroHeading", gyro.getFusedHeading());
     } catch (RuntimeException ex) {
       DriverStation.reportError("Error instantiating navX-MXP:  " + ex.getMessage(), true);
     }

@@ -100,7 +100,7 @@ public final class Constants {
          */
 
          // Front Left Module
-        public static final SwerveModuleConstants Front_Left_Configuration = new SwerveModuleConstants(
+        public static final SwerveModuleConstants frontLeft = new SwerveModuleConstants(
                 1,
                 8,
                 1,
@@ -112,7 +112,7 @@ public final class Constants {
         );
 
         // Front Right
-        public static final SwerveModuleConstants Front_Right_Configuration = new SwerveModuleConstants(
+        public static final SwerveModuleConstants frontRight = new SwerveModuleConstants(
                 2,
                 6,
                 7,
@@ -123,9 +123,21 @@ public final class Constants {
                 0
         );
 
-        // Back Right
-        public static final SwerveModuleConstants Back_Right_Configuration = new SwerveModuleConstants(
+        // Back Left
+        public static final SwerveModuleConstants backLeft = new SwerveModuleConstants(
                 3,
+                2,
+                3,
+                true,
+                false,
+                false,
+                2 * Math.PI,
+                 .158 //0 to 1
+        );
+
+        // Back Right
+        public static final SwerveModuleConstants backRight = new SwerveModuleConstants(
+                4,
                 4,
                 5,
                 true,
@@ -135,17 +147,7 @@ public final class Constants {
                 .759                  
         );
 
-        // Back Left
-        public static final SwerveModuleConstants Back_Left_Configuration = new SwerveModuleConstants(
-                4,
-                2,
-                3,
-                true,
-                false,
-                false,
-                2 * Math.PI,
-                 .158 //0 to 1
-        );
+
     }
 
     public static final class OIConstants {

@@ -33,9 +33,28 @@ public class SwerveModule {
   private final RelativeEncoder m_turningMotorEncoder;
   private final SparkAbsoluteEncoder m_angleEncoder;
 
-  private PIDController m_drivePIDController;
-  private PIDController m_simpleTurningPIDController;
-  private ProfiledPIDController m_turningPIDController;
+  /**
+   * Make PID continuous around the 180degree point of the rotation
+   *            0
+   *      PI/2  +  -PI/2
+   *          PI/-PI
+   * Note that + angle goes CCW from the zero point of the encoder.
+   */
+  private PIDController m_simpleTurningPIDController = new PIDController(
+    ModuleConstants.kPModuleTurningController,
+    0,
+    0);
+
+  private ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
+        ModuleConstants.kPModuleTurningController,
+        0,
+        0,
+        new TrapezoidProfile.Constraints(
+            ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
+            ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
+
+
+  private PIDController m_drivePIDController = new PIDController(ModuleConstants.kPModuleDriveController, 0, 0);
 
   /**
    * Constructs a SwerveModule.
@@ -54,7 +73,12 @@ public class SwerveModule {
 
     m_angleEncoder = m_turningMotor.getAbsoluteEncoder(Type.kDutyCycle);
 
-    configureDevices();
+    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_turningPIDController.setTolerance(0.001);
+    m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    m_drivePIDController.setTolerance(0.1, 0.1);
+
+    updateDashboard();
   }
 
   /**
@@ -81,9 +105,9 @@ public class SwerveModule {
    */
   public Rotation2d getAngle() {
     double raw_angle = getRawAngle();
-    double mapped = LinearMap.map(raw_angle, 0.0, 1.0, -Math.PI, Math.PI);
-    SmartDashboard.putNumber("Mapped Raw Module Angle", mapped);
+    double mapped = LinearMap.map(raw_angle, 0.0, 1.0, 0, 2*Math.PI);
     Rotation2d rot = new Rotation2d(mapped);
+    SmartDashboard.putNumber("Mapped Raw Module Angle", rot.getRadians());
     return rot;
   }
 
@@ -241,12 +265,18 @@ public class SwerveModule {
               ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
               ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
 
-      m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+      m_turningPIDController.enableContinuousInput(0, 2*Math.PI);
       m_turningPIDController.setTolerance(0.001);
       m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-
-      m_drivePIDController = new PIDController(ModuleConstants.kPModuleDriveController, 0, 0);
-
-      m_drivePIDController.setTolerance(0.1, 0.1);
+  }
+  
+  public void updateDashboard() {
+    SmartDashboard.putNumber("module/EncoderZero", m_angleEncoder.getZeroOffset());
+    SmartDashboard.putBoolean("module/AngleInverted", m_angleEncoder.getInverted());
+    SmartDashboard.putBoolean("module/DriveInverted", m_driveMotor.getInverted());
+    SmartDashboard.putBoolean("module/TurnInverted", m_turningMotor.getInverted());
+    SmartDashboard.putNumber("module/EncoderCF", m_angleEncoder.getPositionConversionFactor());
+    SmartDashboard.putNumber("module/DriveCF", m_driveMotorEncoder.getPositionConversionFactor());
+    SmartDashboard.putNumber("module/AnglePos", m_turningMotorEncoder.getPosition());
   }
 }
