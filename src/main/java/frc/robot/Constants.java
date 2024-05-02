@@ -90,6 +90,12 @@ public final class Constants {
         public static final double kPModuleTurningController = 0.20;
         public static final double kPModuleDriveController = 0.0020645;
 
+        public static final class SwervePID {
+                public static final double p = 0.12;
+                public static final double i = 0;
+                public static final double d = 0.0015;
+        }
+
         /**
          * Module Configurations:
          * CanCoder offset is a raw number (0-1), this is measured using the rev client (or the
@@ -146,8 +152,6 @@ public final class Constants {
                 2 * Math.PI, 
                 .759                  
         );
-
-
     }
 
     public static final class OIConstants {

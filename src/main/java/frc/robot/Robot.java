@@ -6,15 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.ModuleConstants;
 import frc.robot.subsystems.SwerveModule;
 import frc.robot.utils.NavXSwerve;
-import frc.robot.utils.SwerveModuleConstants;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.SPI;
 
@@ -64,8 +60,8 @@ public class Robot extends TimedRobot {
     // joy_angle = -m_driverController.getRawAxis(0) * (2*Math.PI);
     // joy_drive = -m_driverController.getRawAxis(2);
     // SmartDashboard.putNumber("Joystick Angle", joy_angle);
-    // SwerveModuleState state = new SwerveModuleState(joy_drive, new Rotation2d(joy_angle));
-    // module.setDesiredState(state);
+    SwerveModuleState state = new SwerveModuleState(0, new Rotation2d(0.0));
+    module.setDesiredState(state);
   }
 
   @Override
@@ -78,8 +74,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Module Position - Angle: ", module.getPosition().angle.getDegrees());
     // raw hardware
     SmartDashboard.putNumber("Raw Turning Motor Angle", module.getRawAngle());
-    SmartDashboard.putNumber("Module Angle", module.getAngle().getDegrees());
-    SmartDashboard.putBoolean("Module Zeroed", (module.getAngle().getRadians() <= 0.1));
+    SmartDashboard.putNumber("Module Angle", module.getRotation().getDegrees());
+    SmartDashboard.putBoolean("Module Zeroed", (module.getRotation().getRadians() <= 0.1));
 
     //
     SmartDashboard.putNumber("Gyro YAW", m_gyro.getYaw());

@@ -12,15 +12,13 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.SparkAbsoluteEncoder.Type;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.ModuleConstants;
-import frc.robot.utils.LinearMap;
+import frc.robot.Constants.ModuleConstants.SwervePID;
 import frc.robot.utils.SwerveModuleConstants;
 
 public class SwerveModule {
@@ -40,19 +38,7 @@ public class SwerveModule {
    *          PI/-PI
    * Note that + angle goes CCW from the zero point of the encoder.
    */
-  private PIDController m_simpleTurningPIDController = new PIDController(
-    ModuleConstants.kPModuleTurningController,
-    0,
-    0);
-
-  private ProfiledPIDController m_turningPIDController = new ProfiledPIDController(
-        ModuleConstants.kPModuleTurningController,
-        0,
-        0,
-        new TrapezoidProfile.Constraints(
-            ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
-            ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
-
+  private PIDController m_TurningPIDController = new PIDController(SwervePID.p, SwervePID.i, SwervePID.d);
 
   private PIDController m_drivePIDController = new PIDController(ModuleConstants.kPModuleDriveController, 0, 0);
 
@@ -72,13 +58,24 @@ public class SwerveModule {
     m_turningMotorEncoder = m_turningMotor.getEncoder();
 
     m_angleEncoder = m_turningMotor.getAbsoluteEncoder(Type.kDutyCycle);
+    m_angleEncoder.setPositionConversionFactor(1.0);
+    m_angleEncoder.setVelocityConversionFactor(1.0);
 
-    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-    m_turningPIDController.setTolerance(0.001);
-    m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
-    m_drivePIDController.setTolerance(0.1, 0.1);
+    double driveReduction = 1.0 / 6.75;
+    double WHEEL_DIAMETER = 0.1016;
+    double rotationsToDistance = driveReduction * WHEEL_DIAMETER * Math.PI;
 
-    updateDashboard();
+    m_turningMotorEncoder.setPosition(0);
+    m_driveMotorEncoder.setPosition(0);
+    m_driveMotorEncoder.setPositionConversionFactor(rotationsToDistance);
+    m_driveMotorEncoder.setVelocityConversionFactor(rotationsToDistance / 60);
+
+    m_TurningPIDController.enableContinuousInput(-180, 180);
+    m_driveMotor.setInverted(module_constants.driveMotorReversed);
+    m_turningMotor.setInverted(module_constants.angleMotorReversed);
+
+    m_turningMotor.setSmartCurrentLimit(ModuleConstants.ANGLE_CURRENT_LIMIT);
+    m_driveMotor.setSmartCurrentLimit(ModuleConstants.DRIVE_CURRENT_LIMIT);
   }
 
   /**
@@ -103,12 +100,8 @@ public class SwerveModule {
    * 
    * @return angle vector mapped to the expected -pi->+pi range
    */
-  public Rotation2d getAngle() {
-    double raw_angle = getRawAngle();
-    double mapped = LinearMap.map(raw_angle, 0.0, 1.0, 0, 2*Math.PI);
-    Rotation2d rot = new Rotation2d(mapped);
-    SmartDashboard.putNumber("Mapped Raw Module Angle", rot.getRadians());
-    return rot;
+  public Rotation2d getRotation() {
+    return Rotation2d.fromDegrees(getRawAngle());
   }
 
   /**
@@ -135,8 +128,7 @@ public class SwerveModule {
    * @return The current state of the module.
    */
   public SwerveModuleState getState() {
-    double velocity = getDriveEncoderVelocity();
-    return new SwerveModuleState(velocity, getAngle());
+    return new SwerveModuleState(getDriveEncoderVelocity(), getRotation());
   }
 
   /**
@@ -145,9 +137,7 @@ public class SwerveModule {
    * @return The current position of the module.
    */
   public SwerveModulePosition getPosition() {
-    double distance = getDriveEncoderPosition();
-    Rotation2d rot = getAngle();
-    return new SwerveModulePosition(distance, rot);
+    return new SwerveModulePosition(getDriveEncoderPosition(), getRotation());
   }
 
   /**
@@ -168,27 +158,17 @@ public class SwerveModule {
     SmartDashboard.putNumber("state Mps", state.speedMetersPerSecond);
 
     // Calculate the turning motor output from the turning PID controller.
-    final double turnOutput_trap = m_turningPIDController.calculate(m_angleEncoder.getPosition(), state.angle.getRadians());
-    final double turnOutput = m_simpleTurningPIDController.calculate(m_angleEncoder.getPosition(), state.angle.getRadians());
+    final double turnOutput = m_TurningPIDController.calculate(m_angleEncoder.getPosition(), state.angle.getRadians());
 
-    SmartDashboard.putNumber("State/setpoint", m_turningPIDController.getSetpoint().position);
+    SmartDashboard.putNumber("State/Setpoint", m_TurningPIDController.getSetpoint());
     SmartDashboard.putNumber("State/driveOutput", driveOutput);
     SmartDashboard.putNumber("State/turnOutput", turnOutput);
-    SmartDashboard.putNumber("State/Trapezoidal turnOutput", turnOutput_trap);
     SmartDashboard.putNumber("Module offset", m_angleEncoder.getZeroOffset());
     SmartDashboard.putNumber("Optimized Angle", target.angle.getDegrees());
-
-
 
     // Calculate the turning motor output from the turning PID controller.
     m_driveMotor.set(driveOutput);
     m_turningMotor.set(turnOutput);
-  }
-
-  /** Zeroes all the SwerveModule encoders. */
-  public void resetEncoders() {
-    m_driveMotorEncoder.setPosition(0.0);
-    m_turningMotorEncoder.setPosition(getAngle().getRadians());
   }
 
   public void stop() {
@@ -252,22 +232,13 @@ public class SwerveModule {
      *          PI/-PI
      * Note that + angle goes CCW from the zero point of the encoder.
      */
-    m_simpleTurningPIDController = new PIDController(
+    m_TurningPIDController = new PIDController(
       ModuleConstants.kPModuleTurningController,
       0,
       0);
 
-      m_turningPIDController = new ProfiledPIDController(
-          ModuleConstants.kPModuleTurningController,
-          0,
-          0,
-          new TrapezoidProfile.Constraints(
-              ModuleConstants.kMaxModuleAngularSpeedRadiansPerSecond,
-              ModuleConstants.kMaxModuleAngularAccelerationRadiansPerSecondSquared));
-
-      m_turningPIDController.enableContinuousInput(0, 2*Math.PI);
-      m_turningPIDController.setTolerance(0.001);
-      m_simpleTurningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+      m_TurningPIDController.enableContinuousInput(0, 2*Math.PI);
+      m_TurningPIDController.setTolerance(0.001);
   }
   
   public void updateDashboard() {
